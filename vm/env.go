@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+	"log"
 
 	"github.com/mattn/anko/parser"
 )
@@ -384,5 +385,7 @@ func (e *Env) Execute(src string) (interface{}, error) {
 	if err != nil {
 		return nilValue, err
 	}
+	log.Printf("stmts", stmts[0])
+	log.Printf("e", e)
 	return Run(stmts, e)
 }
