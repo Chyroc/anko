@@ -7,6 +7,7 @@ import (
 	"unicode"
 
 	"github.com/mattn/anko/ast"
+	"log"
 )
 
 const (
@@ -63,7 +64,7 @@ var opName = map[string]int{
 	"chan":     CHAN,
 	"make":     MAKE,
 	"type":     TYPE,
-	"len":     LEN,
+	"len":      LEN,
 }
 
 // Init resets code to scan.
@@ -507,6 +508,7 @@ func Parse(s *Scanner) ([]ast.Stmt, error) {
 	if yyParse(&l) != 0 {
 		return nil, l.e
 	}
+	log.Printf("l.stmts", l.stmts)
 	return l.stmts, l.e
 }
 
@@ -519,5 +521,6 @@ func ParseSrc(src string) ([]ast.Stmt, error) {
 	scanner := &Scanner{
 		src: []rune(src),
 	}
-	return Parse(scanner)
+	b, err := Parse(scanner)
+	return b, err
 }

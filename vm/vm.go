@@ -123,6 +123,7 @@ func isNum(v reflect.Value) bool {
 }
 
 // equal returns true when lhsV and rhsV is same value.
+// 判断是否相等
 func equal(lhsV, rhsV reflect.Value) bool {
 	lhsNotValid, rhsVNotValid := !lhsV.IsValid(), !rhsV.IsValid()
 	if lhsNotValid && rhsVNotValid {

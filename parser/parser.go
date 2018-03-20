@@ -6,6 +6,7 @@ import __yyfmt__ "fmt"
 //line parser.go.y:2
 import (
 	"github.com/mattn/anko/ast"
+	"log"
 )
 
 //line parser.go.y:27
@@ -1017,6 +1018,7 @@ func yyParse(yylex yyLexer) int {
 	return yyNewParser().Parse(yylex)
 }
 
+// 这个函数是parse的过程
 func (yyrcvr *yyParserImpl) Parse(yylex yyLexer) int {
 	var yyn int
 	var yyVAL yySymType
@@ -1030,6 +1032,10 @@ func (yyrcvr *yyParserImpl) Parse(yylex yyLexer) int {
 	yyrcvr.char = -1
 	yytoken := -1 // yyrcvr.char translated into internal numbering
 	defer func() {
+		log.Printf("yyrcvr", yyrcvr)
+		if l, ok := yylex.(*Lexer); ok {
+			log.Printf("yylex.(*Lexer).stmts ", l.stmts)
+		}
 		// Make sure we report no lookahead when not parsing.
 		yystate = -1
 		yyrcvr.char = -1
@@ -1045,7 +1051,7 @@ ret1:
 	return 1
 
 yystack:
-	/* put a state and value onto the stack */
+/* put a state and value onto the stack */
 	if yyDebug >= 4 {
 		__yyfmt__.Printf("char %v in %v\n", yyTokname(yytoken), yyStatname(yystate))
 	}
@@ -1084,7 +1090,7 @@ yynewstate:
 	}
 
 yydefault:
-	/* default state action */
+/* default state action */
 	yyn = yyDef[yystate]
 	if yyn == -2 {
 		if yyrcvr.char < 0 {

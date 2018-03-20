@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/mattn/anko/ast"
+	"log"
 )
 
 func funcExpr(funcExpr *ast.FuncExpr, env *Env) (reflect.Value, error) {
@@ -83,6 +84,7 @@ func anonCallExpr(e *ast.AnonCallExpr, env *Env) (reflect.Value, error) {
 	return nilValue, newStringError(e, "cannot call type "+f.Type().String())
 }
 
+// 计算表达式
 func callExpr(callExpr *ast.CallExpr, env *Env) (rv reflect.Value, err error) {
 	// Note that if the function type looks the same as the VM function type, the returned values will probably be wrong
 
@@ -96,6 +98,8 @@ func callExpr(callExpr *ast.CallExpr, env *Env) (rv reflect.Value, err error) {
 			return
 		}
 	}
+
+	log.Printf("callExpr %v kind(%v) type(%v)", callExpr.Name, f.Kind(), f.Type())
 
 	if f.Kind() == reflect.Interface && !f.IsNil() {
 		f = f.Elem()
@@ -119,6 +123,8 @@ func callExpr(callExpr *ast.CallExpr, env *Env) (rv reflect.Value, err error) {
 		return
 	}
 
+	log.Printf("makeCallArgs args(%v), useCallSlice(%v), err(%v)", args, useCallSlice, err)
+
 	defer func() {
 		if os.Getenv("ANKO_DEBUG") == "" {
 			if recoverResult := recover(); recoverResult != nil {
@@ -138,7 +144,9 @@ func callExpr(callExpr *ast.CallExpr, env *Env) (rv reflect.Value, err error) {
 			go f.Call(args)
 			return
 		}
+
 		rvs = f.Call(args)
+		log.Printf("f.Call args(%v) rvs(%v)", args, rvs)
 	}
 
 	// TOFIX: how VM pointers/addressing work
@@ -148,6 +156,7 @@ func callExpr(callExpr *ast.CallExpr, env *Env) (rv reflect.Value, err error) {
 		for i, expr := range callExpr.SubExprs {
 			if addrExpr, ok := expr.(*ast.AddrExpr); ok {
 				if identExpr, ok := addrExpr.Expr.(*ast.IdentExpr); ok {
+					log.Printf("invokeLetExpr(identExpr, args[i].Elem(), env)", identExpr, args[i].Elem())
 					invokeLetExpr(identExpr, args[i].Elem(), env)
 				}
 			}
@@ -159,10 +168,16 @@ func callExpr(callExpr *ast.CallExpr, env *Env) (rv reflect.Value, err error) {
 	return
 }
 
+// 是否是 RunVmFunction 函数？
 func checkIfRunVmFunction(rt reflect.Type) bool {
+
 	if rt.NumOut() != 2 || rt.Out(0) != reflectValueType || rt.Out(1) != reflectValueType {
 		return false
 	}
+
+	log.Printf("rt.Out(0)", rt.Out(0))
+	log.Printf("rt.Out(0)", rt.Out(1))
+
 	if rt.NumIn() > 1 {
 		if rt.IsVariadic() {
 			if rt.In(rt.NumIn()-1) != interfaceSliceType {
@@ -194,8 +209,8 @@ func makeCallArgs(rt reflect.Type, isRunVmFunction bool, callExpr *ast.CallExpr,
 		(!rt.IsVariadic() && callExpr.VarArg && numIn < numExprs) {
 		return []reflect.Value{}, false, newStringError(callExpr, fmt.Sprintf("function wants %v arguments but received %v", numIn, numExprs))
 	}
-	if rt.IsVariadic() && rt.In(numIn-1).Kind() != reflect.Slice && rt.In(numIn-1).Kind() != reflect.Array {
-		return []reflect.Value{}, false, newStringError(callExpr, "function is variadic but last parameter is of type "+rt.In(numIn-1).String())
+	if rt.IsVariadic() && rt.In(numIn - 1).Kind() != reflect.Slice && rt.In(numIn - 1).Kind() != reflect.Array {
+		return []reflect.Value{}, false, newStringError(callExpr, "function is variadic but last parameter is of type "+rt.In(numIn - 1).String())
 	}
 
 	var err error
