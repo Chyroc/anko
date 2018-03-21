@@ -70,6 +70,7 @@ compstmt :
 	}
 	| stmts opt_terms
 	{
+	    print($1)
 		$$ = $1
 	}
 

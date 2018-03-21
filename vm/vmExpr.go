@@ -649,7 +649,6 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		}
 
 		return reflect.New(t), nil
-
 	case *ast.MakeExpr:
 		log.Printf("invokeExpr MakeExpr %v", e)
 		t, err := getTypeFromString(env, e.Type)
@@ -691,8 +690,11 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 			acap = alen
 		}
 
-		return reflect.MakeSlice(reflect.SliceOf(t), alen, acap), nil
+		//if acap > alen {
+		//	return nilValue, newError(e, fmt.Errorf("len larger than cap in make([]int64)"))
+		//}
 
+		return reflect.MakeSlice(reflect.SliceOf(t), alen, acap), nil
 	case *ast.MakeTypeExpr:
 		log.Printf("invokeExpr MakeTypeExpr %v", e)
 		rv, err := invokeExpr(e.Type, env)

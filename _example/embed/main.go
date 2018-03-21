@@ -1,24 +1,23 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/mattn/anko/vm"
+	"github.com/mattn/anko/core"
 )
 
 func main() {
 	env := vm.NewEnv()
-
-	env.Define("foo", 1)
-	env.Define("bar", func() int {
-		return 2
-	})
-
-	v, err := env.Execute(`foo + bar()`)
+	core.Import(env)
+	core.ImportToX(env)
+	v, err := env.Execute(`var fmt = import("fmt")
+a = make([]int64, 10, 9)
+println(a)`)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("err %v\n", err)
+		return
 	}
 
-	fmt.Println(v)
+	log.Printf("v %v\n", v)
 }

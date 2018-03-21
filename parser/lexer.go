@@ -434,6 +434,7 @@ func (s *Scanner) scanRawString() (string, error) {
 
 // scanString returns string starting at current position.
 // This handles backslash escaping.
+// 扫描，知道遇到某一个字符
 func (s *Scanner) scanString(l rune) (string, error) {
 	var ret []rune
 eos:
@@ -509,6 +510,14 @@ func Parse(s *Scanner) ([]ast.Stmt, error) {
 		return nil, l.e
 	}
 	log.Printf("l.stmts", l.stmts)
+	//log.Printf("l.stmts", len(l.stmts))
+	//x:=l.stmts[0].(*ast.ExprStmt).Expr.(*ast.BinOpExpr)
+	//log.Printf("l.stmts %#v", x.Operator)
+	//log.Printf("l.stmts %#v", x.Lhs)
+	//log.Printf("l.stmts %#v", x.Rhs)
+	//log.Printf("l.stmts %#v", x.ExprImpl)
+	//log.Printf("l.stmts %#v", x.PosImpl)
+
 	return l.stmts, l.e
 }
 
