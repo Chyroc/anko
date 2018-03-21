@@ -5,7 +5,7 @@ import (
 	"reflect"
 
 	"github.com/mattn/anko/ast"
-	"log"
+	"github.com/mattn/anko/utils"
 )
 
 // Run executes statements in the specified environment.
@@ -25,23 +25,23 @@ func run(stmts []ast.Stmt, env *Env) (reflect.Value, error) {
 	rv := nilValue
 	var err error
 	for _, stmt := range stmts {
-		log.Printf("stmt", stmt)
+		utils.Printf("stmt", stmt)
 		switch stmt.(type) {
 		case *ast.BreakStmt:
-			log.Printf("ast.BreakStmt")
+			utils.Printf("ast.BreakStmt")
 			return nilValue, BreakError
 		case *ast.ContinueStmt:
-			log.Printf("ast.ContinueStmt")
+			utils.Printf("ast.ContinueStmt")
 			return nilValue, ContinueError
 		case *ast.ReturnStmt:
-			log.Printf("ast.ReturnStmt")
+			utils.Printf("ast.ReturnStmt")
 			rv, err = runSingleStmt(stmt, env)
 			if err != nil {
 				return rv, err
 			}
 			return rv, ReturnError
 		default:
-			log.Printf("runSingleStmt")
+			utils.Printf("runSingleStmt")
 			rv, err = runSingleStmt(stmt, env)
 			if err != nil {
 				return rv, err
@@ -67,14 +67,14 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (reflect.Value, error) {
 	}
 	switch stmt := stmt.(type) {
 	case *ast.ExprStmt:
-		log.Printf("stmt ast.ExprStmt", stmt)
+		utils.Printf("stmt ast.ExprStmt", stmt)
 		rv, err := invokeExpr(stmt.Expr, env)
 		if err != nil {
 			return rv, newError(stmt, err)
 		}
 		return rv, nil
 	case *ast.VarStmt:
-		log.Printf("stmt %#", stmt)
+		utils.Printf("stmt %#", stmt)
 		var err error
 		rvs := make([]reflect.Value, len(stmt.Exprs))
 		for i, expr := range stmt.Exprs {
@@ -91,7 +91,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (reflect.Value, error) {
 		}
 		return rvs[len(rvs)-1], nil
 	case *ast.LetsStmt:
-		log.Printf("stmt %#", stmt)
+		utils.Printf("stmt %#", stmt)
 		var err error
 		rvs := make([]reflect.Value, len(stmt.Rhss))
 		for i, rhs := range stmt.Rhss {
@@ -127,7 +127,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (reflect.Value, error) {
 		}
 		return rvs[len(rvs)-1], nil
 	case *ast.IfStmt:
-		log.Printf("stmt %#", stmt)
+		utils.Printf("stmt %#", stmt)
 		// If
 		rv, err := invokeExpr(stmt.If, env)
 		if err != nil {
@@ -175,7 +175,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (reflect.Value, error) {
 		}
 		return rv, nil
 	case *ast.TryStmt:
-		log.Printf("stmt %#", stmt)
+		utils.Printf("stmt %#", stmt)
 		newenv := env.NewEnv()
 		defer newenv.Destroy()
 		_, err := run(stmt.Try, newenv)
@@ -204,7 +204,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (reflect.Value, error) {
 		}
 		return nilValue, newError(stmt, err)
 	case *ast.LoopStmt:
-		log.Printf("stmt %#", stmt)
+		utils.Printf("stmt %#", stmt)
 		newenv := env.NewEnv()
 		defer newenv.Destroy()
 		for {
@@ -234,7 +234,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (reflect.Value, error) {
 		}
 		return nilValue, nil
 	case *ast.ForStmt:
-		log.Printf("stmt %#", stmt)
+		utils.Printf("stmt %#", stmt)
 		val, ee := invokeExpr(stmt.Value, env)
 		if ee != nil {
 			return val, ee
@@ -269,7 +269,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (reflect.Value, error) {
 			}
 			return nilValue, nil
 		case reflect.Map:
-			log.Printf("stmt %#", stmt)
+			utils.Printf("stmt %#", stmt)
 			newenv := env.NewEnv()
 			defer newenv.Destroy()
 
@@ -295,7 +295,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (reflect.Value, error) {
 			}
 			return nilValue, nil
 		case reflect.Chan:
-			log.Printf("stmt %#", stmt)
+			utils.Printf("stmt %#", stmt)
 			newenv := env.NewEnv()
 			defer newenv.Destroy()
 
@@ -327,7 +327,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (reflect.Value, error) {
 			return nilValue, newStringError(stmt, "for cannot loop over type "+val.Kind().String())
 		}
 	case *ast.CForStmt:
-		log.Printf("stmt %#", stmt)
+		utils.Printf("stmt %#", stmt)
 		newenv := env.NewEnv()
 		defer newenv.Destroy()
 		_, err := invokeExpr(stmt.Expr1, newenv)
@@ -363,7 +363,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (reflect.Value, error) {
 		}
 		return nilValue, nil
 	case *ast.ReturnStmt:
-		log.Printf("stmt %#", stmt)
+		utils.Printf("stmt %#", stmt)
 		var err error
 		rv := nilValue
 		switch len(stmt.Exprs) {
@@ -390,7 +390,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (reflect.Value, error) {
 		}
 		return reflect.ValueOf(rvs), nil
 	case *ast.ThrowStmt:
-		log.Printf("stmt %#", stmt)
+		utils.Printf("stmt %#", stmt)
 		rv, err := invokeExpr(stmt.Expr, env)
 		if err != nil {
 			return rv, newError(stmt, err)
@@ -400,7 +400,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (reflect.Value, error) {
 		}
 		return rv, newStringError(stmt, fmt.Sprint(rv.Interface()))
 	case *ast.ModuleStmt:
-		log.Printf("stmt %#", stmt)
+		utils.Printf("stmt %#", stmt)
 		newenv := env.NewEnv()
 		newenv.SetName(stmt.Name)
 		rv, err := run(stmt.Stmts, newenv)
@@ -410,7 +410,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (reflect.Value, error) {
 		env.defineGlobalValue(stmt.Name, reflect.ValueOf(newenv))
 		return rv, nil
 	case *ast.SwitchStmt:
-		log.Printf("stmt %#", stmt)
+		utils.Printf("stmt %#", stmt)
 		rv, err := invokeExpr(stmt.Expr, env)
 		if err != nil {
 			return rv, newError(stmt, err)
@@ -422,7 +422,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (reflect.Value, error) {
 				defaultStmt = ssd
 				continue
 			}
-			caseStmt:= ss.(*ast.CaseStmt)
+			caseStmt := ss.(*ast.CaseStmt)
 			cv, err := invokeExpr(caseStmt.Expr, env)
 			if err != nil {
 				return nilValue, newError(stmt, err)
@@ -445,7 +445,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (reflect.Value, error) {
 		}
 		return rv, nil
 	default:
-		log.Printf("stmt %#", stmt)
+		utils.Printf("stmt %#", stmt)
 		return nilValue, newStringError(stmt, "unknown statement")
 	}
 }

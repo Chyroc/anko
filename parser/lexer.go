@@ -7,6 +7,7 @@ import (
 	"unicode"
 
 	"github.com/mattn/anko/ast"
+	"github.com/mattn/anko/utils"
 	"log"
 )
 
@@ -87,6 +88,7 @@ retry:
 		if name, ok := opName[lit]; ok {
 			tok = name
 		} else {
+			log.Printf("", "ident", tok, lit)
 			tok = IDENT
 		}
 	case isDigit(ch):
@@ -509,14 +511,14 @@ func Parse(s *Scanner) ([]ast.Stmt, error) {
 	if yyParse(&l) != 0 {
 		return nil, l.e
 	}
-	log.Printf("l.stmts", l.stmts)
-	//log.Printf("l.stmts", len(l.stmts))
+	utils.Printf("l.stmts", l.stmts)
+	//utils.Printf("l.stmts", len(l.stmts))
 	//x:=l.stmts[0].(*ast.ExprStmt).Expr.(*ast.BinOpExpr)
-	//log.Printf("l.stmts %#v", x.Operator)
-	//log.Printf("l.stmts %#v", x.Lhs)
-	//log.Printf("l.stmts %#v", x.Rhs)
-	//log.Printf("l.stmts %#v", x.ExprImpl)
-	//log.Printf("l.stmts %#v", x.PosImpl)
+	//utils.Printf("l.stmts %#v", x.Operator)
+	//utils.Printf("l.stmts %#v", x.Lhs)
+	//utils.Printf("l.stmts %#v", x.Rhs)
+	//utils.Printf("l.stmts %#v", x.ExprImpl)
+	//utils.Printf("l.stmts %#v", x.PosImpl)
 
 	return l.stmts, l.e
 }

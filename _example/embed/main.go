@@ -15,9 +15,9 @@ func main() {
 a = make([]int64, 10, 9)
 println(a)`)
 	if err != nil {
-		log.Printf("err %v\n", err)
+		utils.Printf("err %v\n", err)
 		return
 	}
 
-	log.Printf("v %v\n", v)
+	utils.Printf("v %v\n", v)
 }

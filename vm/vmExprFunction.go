@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"log"
 
 	"github.com/mattn/anko/ast"
-	"log"
+	"github.com/mattn/anko/utils"
 )
 
 func funcExpr(funcExpr *ast.FuncExpr, env *Env) (reflect.Value, error) {
@@ -123,7 +124,7 @@ func callExpr(callExpr *ast.CallExpr, env *Env) (rv reflect.Value, err error) {
 		return
 	}
 
-	log.Printf("makeCallArgs args(%v), useCallSlice(%v), err(%v)", args, useCallSlice, err)
+	utils.Printf("makeCallArgs args(%v), useCallSlice(%v), err(%v)", args, useCallSlice, err)
 
 	defer func() {
 		if os.Getenv("ANKO_DEBUG") == "" {
@@ -146,7 +147,7 @@ func callExpr(callExpr *ast.CallExpr, env *Env) (rv reflect.Value, err error) {
 		}
 
 		rvs = f.Call(args)
-		log.Printf("f.Call args(%v) rvs(%v)", args, rvs)
+		utils.Printf("f.Call args(%v) rvs(%v)", args, rvs)
 	}
 
 	// TOFIX: how VM pointers/addressing work
@@ -156,7 +157,7 @@ func callExpr(callExpr *ast.CallExpr, env *Env) (rv reflect.Value, err error) {
 		for i, expr := range callExpr.SubExprs {
 			if addrExpr, ok := expr.(*ast.AddrExpr); ok {
 				if identExpr, ok := addrExpr.Expr.(*ast.IdentExpr); ok {
-					log.Printf("invokeLetExpr(identExpr, args[i].Elem(), env)", identExpr, args[i].Elem())
+					utils.Printf("invokeLetExpr(identExpr, args[i].Elem(), env)", identExpr, args[i].Elem())
 					invokeLetExpr(identExpr, args[i].Elem(), env)
 				}
 			}
@@ -175,8 +176,8 @@ func checkIfRunVmFunction(rt reflect.Type) bool {
 		return false
 	}
 
-	log.Printf("rt.Out(0)", rt.Out(0))
-	log.Printf("rt.Out(0)", rt.Out(1))
+	utils.Printf("rt.Out(0)", rt.Out(0))
+	utils.Printf("rt.Out(0)", rt.Out(1))
 
 	if rt.NumIn() > 1 {
 		if rt.IsVariadic() {

@@ -2,6 +2,7 @@ package packages
 
 import (
 	"log"
+	"reflect"
 )
 
 func init() {
@@ -22,5 +23,9 @@ func init() {
 		"SetFlags":  log.SetFlags,
 		"SetOutput": log.SetOutput,
 		"SetPrefix": log.SetPrefix,
+	}
+
+	Packages["reflect"] = map[string]interface{}{
+		"ValueOf": reflect.ValueOf,
 	}
 }
