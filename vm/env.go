@@ -5,9 +5,8 @@ import (
 	"reflect"
 	"strings"
 	"sync"
-	"github.com/mattn/anko/utils"
-
 	"github.com/mattn/anko/parser"
+	"log"
 )
 
 type EnvResolver interface {
@@ -383,6 +382,8 @@ func (e *Env) Execute(src string) (interface{}, error) {
 	if err != nil {
 		return nilValue, err
 	}
-	utils.Printf("stmts %v", stmts[0])
+	for k, v := range stmts {
+		log.Printf("stmts %d %#v", k, v)
+	}
 	return Run(stmts, e)
 }

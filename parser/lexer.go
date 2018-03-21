@@ -8,7 +8,6 @@ import (
 
 	"github.com/mattn/anko/ast"
 	"github.com/mattn/anko/utils"
-	"log"
 )
 
 const (
@@ -88,7 +87,6 @@ retry:
 		if name, ok := opName[lit]; ok {
 			tok = name
 		} else {
-			log.Printf("", "ident", tok, lit)
 			tok = IDENT
 		}
 	case isDigit(ch):
