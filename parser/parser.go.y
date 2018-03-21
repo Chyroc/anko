@@ -47,7 +47,7 @@ import (
 	array_count     ast.ArrayCount
 }
 
-%token<tok> IDENT NUMBER STRING ARRAY VARARG FUNC RETURN VAR THROW IF ELSE FOR IN EQEQ NEQ GE LE OROR ANDAND NEW TRUE FALSE NIL MODULE TRY CATCH FINALLY PLUSEQ MINUSEQ MULEQ DIVEQ ANDEQ OREQ BREAK CONTINUE PLUSPLUS MINUSMINUS POW SHIFTLEFT SHIFTRIGHT SWITCH CASE DEFAULT GO CHAN MAKE OPCHAN TYPE LEN
+%token<tok> IDENT NUMBER STRING ARRAY VARARG FUNC RETURN VAR THROW IF ELSE FOR IN EQEQ NEQ GE LE OROR ANDAND NEW TRUE FALSE NIL MODULE TRY CATCH FINALLY PLUSEQ MINUSEQ MULEQ DIVEQ ANDEQ OREQ BREAK CONTINUE PLUSPLUS MINUSMINUS POW SHIFTLEFT SHIFTRIGHT SWITCH CASE DEFAULT GO CHAN MAKE OPCHAN TYPE LEN DELETE
 
 %right '='
 %right '?' ':'
@@ -70,7 +70,6 @@ compstmt :
 	}
 	| stmts opt_terms
 	{
-	    print($1)
 		$$ = $1
 	}
 
@@ -733,6 +732,11 @@ expr :
 		$$ = &ast.ChanExpr{Rhs: $2}
 		$$.SetPosition($2.Position())
 	}
+	| DELETE '(' expr ',' expr ')'
+    {
+        $$ = &ast.DeleteExpr{MapExpr: $3, KeyExpr: $5}
+        $$.SetPosition($1.Position())
+    }
 
 opt_terms : /* none */
 	| terms
@@ -756,3 +760,4 @@ term : ';'
 	;
 
 %%
+2
