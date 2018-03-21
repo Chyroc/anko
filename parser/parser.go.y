@@ -733,10 +733,10 @@ expr :
 		$$.SetPosition($2.Position())
 	}
 	| DELETE '(' expr ',' expr ')'
-    {
-        $$ = &ast.DeleteExpr{MapExpr: $3, KeyExpr: $5}
-        $$.SetPosition($1.Position())
-    }
+	{
+		$$ = &ast.DeleteExpr{MapExpr: $3, KeyExpr: $5}
+		$$.SetPosition($1.Position())
+	}
 
 opt_terms : /* none */
 	| terms
@@ -760,4 +760,3 @@ term : ';'
 	;
 
 %%
-2

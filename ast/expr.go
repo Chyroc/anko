@@ -207,12 +207,6 @@ type MakeExpr struct {
 	CapExpr    Expr
 }
 
-type DeleteExpr struct {
-	ExprImpl
-	MapExpr Expr
-	KeyExpr Expr
-}
-
 type MakeTypeExpr struct {
 	ExprImpl
 	Name string
@@ -223,4 +217,11 @@ type MakeTypeExpr struct {
 type LenExpr struct {
 	ExprImpl
 	Expr Expr
+}
+
+// DeleteExpr provide `delete(map, key)` expression
+type DeleteExpr struct {
+	ExprImpl
+	MapExpr Expr
+	KeyExpr Expr
 }

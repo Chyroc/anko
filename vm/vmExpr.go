@@ -298,9 +298,8 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 			v = v.Index(ii)
 			if v.Type().ConvertibleTo(stringType) {
 				return v.Convert(stringType), nil
-			} else {
-				return nilValue, newStringError(e, "invalid type conversion")
 			}
+			return nilValue, newStringError(e, "invalid type conversion")
 		case reflect.Map:
 			v = getMapIndex(i, v)
 			return v, nil
@@ -787,26 +786,34 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 	case *ast.CallExpr:
 		log.Printf("invokeExpr CallExpr %v", e)
 		return callExpr(e, env)
+
 	case *ast.DeleteExpr:
 		mapExpr, err := invokeExpr(e.MapExpr, env)
 		if err != nil {
-			return nilValue, newStringError(e, err.Error())
+			return nilValue, newError(e.MapExpr, err)
 		}
 
 		keyExpr, err := invokeExpr(e.KeyExpr, env)
 		if err != nil {
-			return nilValue, newStringError(e, err.Error())
+			return nilValue, newError(e.KeyExpr, err)
+		}
+
+		if includeReflectKind(mapExpr.Kind(), reflect.Chan, reflect.Func, reflect.Map, reflect.Ptr, reflect.Interface, reflect.Slice) {
+			if mapExpr.IsNil() {
+				return nilValue, newStringError(e, fmt.Sprintf("first argument to delete must be map; have nil"))
+			}
 		}
 
 		if mapExpr.Kind() != reflect.Map {
-			return nilValue, newStringError(e, "cannot delete on not map")
+			return nilValue, newStringError(e, fmt.Sprintf("first argument to delete must be map; have %s", mapExpr.Kind()))
 		}
-		if keyExpr.Kind() == reflect.String {
-			return nilValue, newStringError(e, "delete key must be string")
+		if keyExpr.Kind() != reflect.String {
+			return nilValue, newStringError(e, "The key parameter of delete must be string")
 		}
 
-		mapExpr.SetMapIndex(reflect.ValueOf(keyExpr.String()), reflect.Value{})
+		mapExpr.SetMapIndex(keyExpr, reflect.Value{})
 		return nilValue, nil
+
 	default:
 		log.Printf("invokeExpr default %v", e)
 		return nilValue, newStringError(e, "Unknown expression")

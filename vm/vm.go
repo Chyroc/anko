@@ -297,9 +297,9 @@ func getTypeFromString(env *Env, name string) (reflect.Type, error) {
 	}
 	t, err := env.Type(typeString)
 	if err != nil {
-		return nilType,  err
+		return nilType, err
 	}
-	return t,  nil
+	return t, nil
 }
 
 func getEnvFromString(env *Env, name string) (*Env, string, error) {
@@ -355,4 +355,13 @@ func makeValue(t reflect.Type) (reflect.Value, error) {
 		return structV, nil
 	}
 	return reflect.New(t).Elem(), nil
+}
+
+func includeReflectKind(kind reflect.Kind, kinds ...reflect.Kind) bool {
+	for _, v := range kinds {
+		if v == kind {
+			return true
+		}
+	}
+	return false
 }
