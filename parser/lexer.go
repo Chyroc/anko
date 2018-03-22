@@ -32,8 +32,8 @@ func (e *Error) Error() string {
 // Scanner stores informations for lexer.
 type Scanner struct {
 	src      []rune
-	offset   int
-	lineHead int
+	offset   int // 当前scan的位置
+	lineHead int //
 	line     int
 }
 
@@ -311,6 +311,7 @@ func isBlank(ch rune) bool {
 }
 
 // peek returns current rune in the code.
+// 取当前offset的值
 func (s *Scanner) peek() rune {
 	if s.reachEOF() {
 		return EOF
@@ -319,6 +320,7 @@ func (s *Scanner) peek() rune {
 }
 
 // next moves offset to next.
+// offset+1，如果当前数据为'\n'，？
 func (s *Scanner) next() {
 	if !s.reachEOF() {
 		if s.peek() == '\n' {
@@ -330,6 +332,7 @@ func (s *Scanner) next() {
 }
 
 // current returns the current offset.
+// 获取当前的offset
 func (s *Scanner) current() int {
 	return s.offset
 }
@@ -345,6 +348,7 @@ func (s *Scanner) back() {
 }
 
 // reachEOF returns true if offset is at end-of-file.
+// offset >= len，达到文件末尾
 func (s *Scanner) reachEOF() bool {
 	return len(s.src) <= s.offset
 }
@@ -526,6 +530,7 @@ func EnableErrorVerbose() {
 }
 
 // ParseSrc provides way to parse the code from source.
+// 解析的入口
 func ParseSrc(src string) ([]ast.Stmt, error) {
 	scanner := &Scanner{
 		src: []rune(src),
