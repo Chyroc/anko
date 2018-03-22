@@ -90,6 +90,7 @@ type BinOpExpr struct {
 	Rhs      Expr
 }
 
+// TernaryOpExpr provide ternary operator expression.
 type TernaryOpExpr struct {
 	ExprImpl
 	Expr Expr
@@ -177,6 +178,7 @@ type ConstExpr struct {
 	Value string
 }
 
+// ChanExpr provide chan expression.
 type ChanExpr struct {
 	ExprImpl
 	Lhs Expr
@@ -189,16 +191,19 @@ type NewExpr struct {
 	Type string
 }
 
+// MakeChanExpr provide expression to make chan instance.
 type MakeChanExpr struct {
 	ExprImpl
 	Type     string
 	SizeExpr Expr
 }
 
+// ArrayCount is used in MakeExpr to provide Dimensions
 type ArrayCount struct {
 	Count int
 }
 
+// MakeExpr provide expression to make instance.
 type MakeExpr struct {
 	ExprImpl
 	Dimensions int
@@ -207,6 +212,7 @@ type MakeExpr struct {
 	CapExpr    Expr
 }
 
+// MakeTypeExpr provide expression to make type.
 type MakeTypeExpr struct {
 	ExprImpl
 	Name string
