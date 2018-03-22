@@ -49,7 +49,7 @@ func funcExpr(funcExpr *ast.FuncExpr, env *Env) (reflect.Value, error) {
 		}
 
 		rv, err = run(funcExpr.Stmts, newEnv)
-		if err != nil && err != ReturnError {
+		if err != nil && err != ErrReturn {
 			err = newError(funcExpr, err)
 			return []reflect.Value{reflect.ValueOf(nilValue), reflect.ValueOf(reflect.ValueOf(newError(funcExpr, err)))}
 		}
@@ -157,7 +157,7 @@ func callExpr(callExpr *ast.CallExpr, env *Env) (rv reflect.Value, err error) {
 		for i, expr := range callExpr.SubExprs {
 			if addrExpr, ok := expr.(*ast.AddrExpr); ok {
 				if identExpr, ok := addrExpr.Expr.(*ast.IdentExpr); ok {
-					invokeLetExpr(identExpr, args[i].Elem().Elem(), env)
+					invokeLetExpr(identExpr, args[i].Elem(), env)
 				}
 			}
 		}
