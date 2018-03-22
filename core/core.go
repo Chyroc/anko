@@ -12,6 +12,7 @@ import (
 )
 
 // Import defines core language builtins - keys, range, println,  etc.
+// 定义了内置函数
 func Import(env *vm.Env) *vm.Env {
 	env.Define("keys", func(v interface{}) []string {
 		rv := reflect.ValueOf(v)

@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"strings"
 	"sync"
-
 	"github.com/mattn/anko/parser"
+	"log"
 )
 
 // EnvResolver provides an interface for extrenal values and types
@@ -383,6 +383,9 @@ func (e *Env) Execute(src string) (interface{}, error) {
 	stmts, err := parser.ParseSrc(src)
 	if err != nil {
 		return nilValue, err
+	}
+	for k, v := range stmts {
+		log.Printf("stmts %d %#v", k, v)
 	}
 	return Run(stmts, e)
 }

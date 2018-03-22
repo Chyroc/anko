@@ -8,13 +8,15 @@ import (
 	"strings"
 
 	"github.com/mattn/anko/ast"
+	"github.com/mattn/anko/utils"
 )
 
 // invokeExpr evaluates one expression.
 func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
+	//utils.Printf("expr %v\n", expr)
 	switch e := expr.(type) {
-
 	case *ast.NumberExpr:
+		utils.Printf("invokeExpr NumberExpr %v", e)
 		if strings.Contains(e.Lit, ".") || strings.Contains(e.Lit, "e") {
 			v, err := strconv.ParseFloat(e.Lit, 64)
 			if err != nil {
@@ -33,14 +35,14 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 			return nilValue, newError(e, err)
 		}
 		return reflect.ValueOf(i), nil
-
 	case *ast.IdentExpr:
+		utils.Printf("invokeExpr IdentExpr %v %v", e, e.Lit)
 		return env.get(e.Lit)
-
 	case *ast.StringExpr:
+		utils.Printf("invokeExpr %v", e)
 		return reflect.ValueOf(e.Lit), nil
-
 	case *ast.ArrayExpr:
+		utils.Printf("invokeExpr ArrayExpr %v", e)
 		a := make([]interface{}, len(e.Exprs))
 		for i, expr := range e.Exprs {
 			arg, err := invokeExpr(expr, env)
@@ -52,6 +54,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		return reflect.ValueOf(a), nil
 
 	case *ast.MapExpr:
+		utils.Printf("invokeExpr MapExpr %v", e)
 		m := make(map[string]interface{}, len(e.MapExpr))
 		for k, expr := range e.MapExpr {
 			v, err := invokeExpr(expr, env)
@@ -63,6 +66,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		return reflect.ValueOf(m), nil
 
 	case *ast.DerefExpr:
+		utils.Printf("invokeExpr DerefExpr %v", e)
 		v := nilValue
 		var err error
 		switch ee := e.Expr.(type) {
@@ -125,6 +129,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		return v.Elem(), nil
 
 	case *ast.AddrExpr:
+		utils.Printf("invokeExpr AddrExpr %v", e)
 		v := nilValue
 		var err error
 		switch ee := e.Expr.(type) {
@@ -187,6 +192,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		return v.Addr(), nil
 
 	case *ast.UnaryExpr:
+		utils.Printf("invokeExpr UnaryExpr %v", e)
 		v, err := invokeExpr(e.Expr, env)
 		if err != nil {
 			return nilValue, newError(e.Expr, err)
@@ -209,13 +215,14 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		}
 
 	case *ast.ParenExpr:
+		utils.Printf("invokeExpr ParenExpr %v", e)
 		v, err := invokeExpr(e.SubExpr, env)
 		if err != nil {
 			return nilValue, newError(e.SubExpr, err)
 		}
 		return v, nil
-
 	case *ast.MemberExpr:
+		utils.Printf("invokeExpr MemberExpr %v", e)
 		v, err := invokeExpr(e.Expr, env)
 		if err != nil {
 			return nilValue, newError(e.Expr, err)
@@ -262,6 +269,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		}
 
 	case *ast.ItemExpr:
+		utils.Printf("invokeExpr ItemExpr %v", e)
 		v, err := invokeExpr(e.Value, env)
 		if err != nil {
 			return nilValue, newError(e.Value, err)
@@ -298,6 +306,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		}
 
 	case *ast.SliceExpr:
+		utils.Printf("invokeExpr SliceExpr %v", e)
 		v, err := invokeExpr(e.Value, env)
 		if err != nil {
 			return nilValue, newError(e.Value, err)
@@ -347,6 +356,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		}
 
 	case *ast.AssocExpr:
+		utils.Printf("invokeExpr AssocExpr %v", e)
 		switch e.Operator {
 		case "++":
 			if alhs, ok := e.Lhs.(*ast.IdentExpr); ok {
@@ -416,6 +426,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		return invokeLetExpr(e.Lhs, v, env)
 
 	case *ast.LetExpr:
+		utils.Printf("invokeExpr LetExpr %v", e)
 		rv, err := invokeExpr(e.Rhs, env)
 		if err != nil {
 			return nilValue, newError(e.Rhs, err)
@@ -426,6 +437,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		return invokeLetExpr(e.Lhs, rv, env)
 
 	case *ast.LetsExpr:
+		utils.Printf("invokeExpr LetsExpr %v", e)
 		var err error
 		rvs := make([]reflect.Value, len(e.Rhss))
 		for i, rhs := range e.Rhss {
@@ -450,10 +462,13 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		return rvs[len(rvs)-1], nil
 
 	case *ast.BinOpExpr:
+		utils.Printf("invokeExpr expr.(type) %v", e, e.Operator)
+		// lhsV 和 rhsV 是左边和右边计算的结果
 		lhsV := nilValue
 		rhsV := nilValue
 		var err error
 
+		// 先计算左边的
 		lhsV, err = invokeExpr(e.Lhs, env)
 		if err != nil {
 			return nilValue, newError(e.Lhs, err)
@@ -461,6 +476,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		if lhsV.Kind() == reflect.Interface && !lhsV.IsNil() {
 			lhsV = lhsV.Elem()
 		}
+		// 再计算右边的
 		if e.Rhs != nil {
 			rhsV, err = invokeExpr(e.Rhs, env)
 			if err != nil {
@@ -470,9 +486,13 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 				rhsV = rhsV.Elem()
 			}
 		}
+
+		utils.Printf("ast.BinOpExpr value lhsV(%v) rhsV(%v)", lhsV, rhsV)
 		switch e.Operator {
 		case "+":
 			if (lhsV.Kind() == reflect.Slice || lhsV.Kind() == reflect.Array) && (rhsV.Kind() != reflect.Slice && rhsV.Kind() != reflect.Array) {
+				// 左边数组，右边不是；且类型一致
+				// 将右边的元素append到左边
 				rhsT := rhsV.Type()
 				lhsT := lhsV.Type().Elem()
 				if lhsT.Kind() != rhsT.Kind() {
@@ -484,27 +504,39 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 				return reflect.Append(lhsV, rhsV), nil
 			}
 			if (lhsV.Kind() == reflect.Slice || lhsV.Kind() == reflect.Array) && (rhsV.Kind() == reflect.Slice || rhsV.Kind() == reflect.Array) {
+				// 左边，右边都是数组
+				// todo
 				return appendSlice(expr, lhsV, rhsV)
 			}
 			if lhsV.Kind() == reflect.String || rhsV.Kind() == reflect.String {
+				// 都是字符串
 				return reflect.ValueOf(toString(lhsV) + toString(rhsV)), nil
 			}
 			if lhsV.Kind() == reflect.Float64 || rhsV.Kind() == reflect.Float64 {
+				// 都是浮点数
 				return reflect.ValueOf(toFloat64(lhsV) + toFloat64(rhsV)), nil
 			}
+
+			// 都是整数
 			return reflect.ValueOf(toInt64(lhsV) + toInt64(rhsV)), nil
 		case "-":
 			if lhsV.Kind() == reflect.Float64 || rhsV.Kind() == reflect.Float64 {
+				// 都是浮点数
 				return reflect.ValueOf(toFloat64(lhsV) - toFloat64(rhsV)), nil
 			}
+			// 都是整数
 			return reflect.ValueOf(toInt64(lhsV) - toInt64(rhsV)), nil
 		case "*":
 			if lhsV.Kind() == reflect.String && (rhsV.Kind() == reflect.Int || rhsV.Kind() == reflect.Int32 || rhsV.Kind() == reflect.Int64) {
+				// 左边字符串，右边是整数
+				// repeat
 				return reflect.ValueOf(strings.Repeat(toString(lhsV), int(toInt64(rhsV)))), nil
 			}
 			if lhsV.Kind() == reflect.Float64 || rhsV.Kind() == reflect.Float64 {
+				// 都是浮点数
 				return reflect.ValueOf(toFloat64(lhsV) * toFloat64(rhsV)), nil
 			}
+			// 都是整数
 			return reflect.ValueOf(toInt64(lhsV) * toInt64(rhsV)), nil
 		case "/":
 			return reflect.ValueOf(toFloat64(lhsV) / toFloat64(rhsV)), nil
@@ -525,31 +557,40 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		case "|":
 			return reflect.ValueOf(toInt64(lhsV) | toInt64(rhsV)), nil
 		case "||":
+			// 若左边为true，返回左边
 			if toBool(lhsV) {
 				return lhsV, nil
 			}
+			// 否则，返回右边
 			return rhsV, nil
 		case "&":
+			// &
 			return reflect.ValueOf(toInt64(lhsV) & toInt64(rhsV)), nil
 		case "&&":
+			// 左边为真，再返回右边
 			if toBool(lhsV) {
 				return rhsV, nil
 			}
+			// 否则返回左边
 			return lhsV, nil
 		case "**":
+			// 乘方
 			if lhsV.Kind() == reflect.Float64 {
 				return reflect.ValueOf(math.Pow(lhsV.Float(), toFloat64(rhsV))), nil
 			}
 			return reflect.ValueOf(int64(math.Pow(toFloat64(lhsV), toFloat64(rhsV)))), nil
 		case ">>":
+			//>>
 			return reflect.ValueOf(toInt64(lhsV) >> uint64(toInt64(rhsV))), nil
 		case "<<":
+			//<<
 			return reflect.ValueOf(toInt64(lhsV) << uint64(toInt64(rhsV))), nil
 		default:
 			return nilValue, newStringError(e, "Unknown operator")
 		}
 
 	case *ast.ConstExpr:
+		utils.Printf("invokeExpr ConstExpr %v", e)
 		switch e.Value {
 		case "true":
 			return trueValue, nil
@@ -559,6 +600,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		return nilValue, nil
 
 	case *ast.TernaryOpExpr:
+		utils.Printf("invokeExpr TernaryOpExpr %v", e)
 		rv, err := invokeExpr(e.Expr, env)
 		if err != nil {
 			return nilValue, newError(e.Expr, err)
@@ -577,6 +619,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		return rhsV, nil
 
 	case *ast.LenExpr:
+		utils.Printf("invokeExpr LenExpr %v", e)
 		rv, err := invokeExpr(e.Expr, env)
 		if err != nil {
 			return nilValue, newError(e.Expr, err)
@@ -593,6 +636,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		return nilValue, newStringError(e, "type "+rv.Kind().String()+" does not support len operation")
 
 	case *ast.NewExpr:
+		utils.Printf("invokeExpr NewExpr %v", e)
 		t, err := getTypeFromString(env, e.Type)
 		if err != nil {
 			return nilValue, newError(e, err)
@@ -602,8 +646,8 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		}
 
 		return reflect.New(t), nil
-
 	case *ast.MakeExpr:
+		utils.Printf("invokeExpr MakeExpr %v", e)
 		t, err := getTypeFromString(env, e.Type)
 		if err != nil {
 			return nilValue, newError(e, err)
@@ -643,9 +687,13 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 			acap = alen
 		}
 
-		return reflect.MakeSlice(reflect.SliceOf(t), alen, acap), nil
+		//if acap > alen {
+		//	return nilValue, newError(e, fmt.Errorf("len larger than cap in make([]int64)"))
+		//}
 
+		return reflect.MakeSlice(reflect.SliceOf(t), alen, acap), nil
 	case *ast.MakeTypeExpr:
+		utils.Printf("invokeExpr MakeTypeExpr %v", e)
 		rv, err := invokeExpr(e.Type, env)
 		if err != nil {
 			return nilValue, newError(e, err)
@@ -661,6 +709,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		return reflect.ValueOf(rv.Type()), nil
 
 	case *ast.MakeChanExpr:
+		utils.Printf("invokeExpr MakeChanExpr %v", e)
 		t, err := getTypeFromString(env, e.Type)
 		if err != nil {
 			return nilValue, newError(e, err)
@@ -681,6 +730,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		return reflect.MakeChan(reflect.ChanOf(reflect.BothDir, t), size), nil
 
 	case *ast.ChanExpr:
+		utils.Printf("invokeExpr ChanExpr %v", e)
 		rhs, err := invokeExpr(e.Rhs, env)
 		if err != nil {
 			return nilValue, newError(e.Rhs, err)
@@ -711,12 +761,15 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		return nilValue, newStringError(e, "Invalid operation for chan")
 
 	case *ast.FuncExpr:
+		utils.Printf("invokeExpr FuncExpr %v", e)
 		return funcExpr(e, env)
 
 	case *ast.AnonCallExpr:
+		utils.Printf("invokeExpr AnonCallExpr %v", e)
 		return anonCallExpr(e, env)
 
 	case *ast.CallExpr:
+		utils.Printf("invokeExpr CallExpr %v", e)
 		return callExpr(e, env)
 
 	case *ast.DeleteExpr:
@@ -724,6 +777,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		if err != nil {
 			return nilValue, newError(e.MapExpr, err)
 		}
+
 		keyExpr, err := invokeExpr(e.KeyExpr, env)
 		if err != nil {
 			return nilValue, newError(e.KeyExpr, err)
@@ -749,6 +803,7 @@ func invokeExpr(expr ast.Expr, env *Env) (reflect.Value, error) {
 		return nilValue, nil
 
 	default:
+		utils.Printf("invokeExpr default %v", e)
 		return nilValue, newStringError(e, "Unknown expression")
 	}
 }

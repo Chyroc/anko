@@ -6,3 +6,4 @@ type Token struct {
 	Tok     int
 	Lit     string
 }
+

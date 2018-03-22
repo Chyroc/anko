@@ -50,6 +50,7 @@ type MapExpr struct {
 }
 
 // IdentExpr provide identity expression.
+// 变量？
 type IdentExpr struct {
 	ExprImpl
 	Lit string
@@ -69,6 +70,7 @@ type AddrExpr struct {
 }
 
 // DerefExpr provide dereferencing address expression.
+// todo: 什么意思
 type DerefExpr struct {
 	ExprImpl
 	Expr Expr
@@ -116,6 +118,7 @@ type AnonCallExpr struct {
 }
 
 // MemberExpr provide expression to refer member.
+// 引用成员
 type MemberExpr struct {
 	ExprImpl
 	Expr Expr
